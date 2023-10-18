@@ -1,0 +1,67 @@
+const int SENSOR_HC_TRIG = 2;
+const int SENSOR_HC_ECHO = 3;
+const int LED_AMAR = 6;
+const int LED_VER = 5 ;
+const int LED_VERM = 7;
+byte BUZZER_HC = 4;
+
+int distancia;
+
+void setup(){
+  Serial.begin(9600);
+  pinMode(SENSOR_HC_TRIG,OUTPUT);
+  pinMode(SENSOR_HC_ECHO,INPUT);
+    pinMode(LED_VERM, OUTPUT);
+    pinMode(LED_AMAR, OUTPUT);
+    pinMode(LED_VER, OUTPUT);
+}
+
+void loop(){
+  leds();
+  tocarBuz();
+  sensorMov();
+  console();
+}
+
+double sensorHc() {
+  digitalWrite(SENSOR_HC_TRIG , HIGH); 
+  delayMicroseconds(10);
+  digitalWrite(SENSOR_HC_TRIG, LOW); 
+  double duracao = pulseIn(SENSOR_HC_ECHO, HIGH); 
+  distancia = duracao * 0.017175;
+  return distancia;
+}
+ 
+void leds(){
+  sensorHc();
+  if(distancia < 30){
+    digitalWrite(LED_VERM, HIGH);
+    digitalWrite(LED_VER, LOW);
+    digitalWrite(LED_AMAR, LOW);
+  }else if(distancia > 30 && distancia < 60){
+   digitalWrite(LED_VERM, LOW);
+   digitalWrite(LED_VER, LOW);
+   digitalWrite(LED_AMAR, HIGH);
+  }else if (distancia > 60){
+   digitalWrite(LED_VERM, LOW);
+   digitalWrite(LED_VER, HIGH);
+   digitalWrite(LED_AMAR, LOW);
+  } 
+}
+
+void tocarBuz(){
+    sensorHc();
+  if(distancia <= 20){
+    tone(BUZZER_HC, 581, 851);
+  } else {
+    noTone(BUZZER_HC);
+  }
+}
+
+void console(){
+  sensorHc();
+  
+  Serial.print(" Distancia ");
+  Serial.println(distancia);
+  delay(1000);
+}

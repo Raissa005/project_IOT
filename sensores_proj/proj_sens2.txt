@@ -1,0 +1,98 @@
+const int SENSOR_HC_TRIG = 2;
+const int SENSOR_HC_ECHO = 3;
+const int LED_AMAR = 6;
+const int LED_VER = 5 ;
+const int LED_VERM = 7;
+const int LED_PR = 11;
+const int SENSOR_PR = 8;
+const int LED_VIBR = 10; 
+const int SENSOR_VIBR = 7; 
+
+byte BUZZER_HC = 4;
+
+int distancia;
+bool returnMov;
+
+void setup(){
+    Serial.begin(9600);
+    pinMode(SENSOR_HC_TRIG,OUTPUT);
+    pinMode(SENSOR_HC_ECHO,INPUT);
+    pinMode(LED_VERM, OUTPUT);
+    pinMode(LED_AMAR, OUTPUT);
+    pinMode(LED_VER, OUTPUT);
+    pinMode(LED_PR, OUTPUT); 
+    pinMode(SENSOR_VIBR , INPUT); 
+    pinMode(LED_VIBR, OUTPUT);
+}
+
+void loop(){
+  leds();
+  tocarBuz();
+  sensorMov();
+  console();
+}
+
+double sensorHc() {
+  digitalWrite(SENSOR_HC_TRIG , HIGH); 
+  delayMicroseconds(10);
+  digitalWrite(SENSOR_HC_TRIG, LOW); 
+  double duracao = pulseIn(SENSOR_HC_ECHO, HIGH); 
+  distancia = duracao * 0.017175;
+  return distancia;
+}
+ 
+void leds(){
+  sensorHc();
+  if(distancia < 30){
+    digitalWrite(LED_VERM, HIGH);
+    digitalWrite(LED_VER, LOW);
+    digitalWrite(LED_AMAR, LOW);
+  }else if(distancia > 30 && distancia < 60){
+   digitalWrite(LED_VERM, LOW);
+   digitalWrite(LED_VER, LOW);
+   digitalWrite(LED_AMAR, HIGH);
+  }else if (distancia > 60){
+   digitalWrite(LED_VERM, LOW);
+   digitalWrite(LED_VER, HIGH);
+   digitalWrite(LED_AMAR, LOW);
+  } 
+}
+
+void tocarBuz(){
+    sensorHc();
+  if(distancia <= 20){
+    tone(BUZZER_HC, 581, 851);
+  } else {
+    noTone(BUZZER_HC);
+  }
+}
+
+double sensorMov(){
+ 	returnMov = digitalRead(SENSOR_PR); 
+  
+  if(returnMov == 1){
+    digitalWrite(LED_PR, HIGH);
+  }else if (returnMov == 0) {
+    digitalWrite(LED_PR, LOW);
+  }
+}
+
+void console(){
+  sensorMov();
+  sensorHc();
+  
+  Serial.print(" Distancia ");
+  Serial.println(distancia);
+  Serial.print(" Movimento ");
+  Serial.println(returnMov);
+  delay(1000);
+}
+
+void vibracao(){
+  sensorHc(); 
+  if(digitalRead(SENSOR_VIBR) == HIGH){ 
+      digitalWrite(LED_VIBR, HIGH); 
+  }else{ 
+    digitalWrite(LED_VIBR, LOW); 
+  }
+}
